@@ -619,3 +619,19 @@ p {
     from { opacity: 1;}
     to { opacity: 0; }
 }
+
+#title h1,
+#menu h2 {
+  position: relative;
+}
+#title h1 > span,
+#menu h2 > span {
+  color: #ff384b;
+  font-size: 30%;
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  transform: rotate(-10deg);
+  -webkit-transform: rotate(-10deg);
+  -moz-transform: rotate(-10deg);
+}
