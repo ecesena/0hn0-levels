@@ -868,7 +868,7 @@ var Game = new (function() {
     Storage.getItem('level', function(resultSet) {
       var value = parseInt(resultSet.level);
       if (!value)
-        value = 0;
+        value = 1;
       cb(value);
     })
   }
