@@ -17,8 +17,9 @@ var Game = new (function() {
       showAppsIcon = window.isWebApp,
       startedTutorial = false,
       grid,
-      sizes = [5,6,7,8],
+      sizes = [5,6,7,8,0],
       lastSize = 0,
+      level = 1,
       currentPuzzle = null,
       checkTOH = 0,
       ojoos = ['Wonderful','Spectacular','Marvelous','Outstanding','Remarkable','Shazam','Impressive','Great','Well done','Fabulous','Clever','Dazzling','Fantastic','Excellent','Nice','Super','Awesome','Ojoo','Brilliant','Splendid','Exceptional','Magnificent','Yay'],
@@ -50,6 +51,9 @@ var Game = new (function() {
       $('#scorenr').html(value);
     });
     $('#tweeturl, #facebook').hide();
+    getLevel(function(value) {
+      level = value;
+    });
 
     if (!window.isWebApp)
       $('#app').hide();
@@ -61,7 +65,7 @@ var Game = new (function() {
       var $el = $(el),
           size = $el.attr('data-size') * 1,
           label = sizes[size - 1];
-      $el.html(label)
+      // $el.html(label)
       $el.on('touchstart mousedown', function(evt){
         if (Utils.isDoubleTapBug(evt)) return false;
         var size = sizes[$(evt.target).closest('[data-size]').attr('data-size') * 1 - 1];
@@ -266,13 +270,13 @@ var Game = new (function() {
     inText = false;
     showGame();
     $('#boardsize').html('<span>Select a size</span>');
+    $('#menugrid h2 > span').text(level);
     $('#menugrid').removeClass('hidden');
     $('#board').addClass('hidden');
     $('#bar [data-action]').not('[data-action="back"]').hide();
     if (continueLastGame && !currentPuzzle.isTutorial) {
       $('[data-action="continue"]').show().addClass('subtleHintOnce');
     }
-    $('#board').addClass('hidden');
     $('#score').show();
     setTimeout(function() {
       if (grid) grid.clear();
@@ -287,11 +291,45 @@ var Game = new (function() {
     setTimeout(function() { $('#loading').addClass('show'); },0);
   }
   
+  function isPrime(n) {
+     // If n is less than 2 or not an integer then by definition cannot be prime.
+     if (n < 2) {return false}
+     if (n != Math.round(n)) {return false}
+     // Now assume that n is prime, we will try to prove that it is not.
+     var isPrime = true;
+     // Now check every whole number from 2 to the square root of n. If any of these divides n exactly, n cannot be prime.
+     for (var i = 2; i <= Math.sqrt(n); i++) {
+        if (n % i == 0) {isPrime = false}
+     }
+     // Finally return whether n is prime or not.
+     return isPrime;
+  }
+
+  function sizeForLevel() {
+    var size = 5;
+    if (level < 12)
+      size = 5 + Math.floor( (level-1) / 3);
+    else {
+      size = ((level - 10) % 4) == 1 ? 8 : 7;
+      if (isPrime (level - 10))
+        size = 6;
+    }
+    return size;
+  }
+
   function loadGame(size) {
     onHomeScreen = false;
     $('#game').removeClass('show')
     showLoad();
     resize();
+
+    if (size===0) {
+      if (currentPuzzle) {
+        continueGame();
+        return;
+      }
+      size = sizeForLevel();
+    }
     
     setTimeout(function() {
       var puzzle = Levels.getSize(size);
@@ -396,6 +434,9 @@ var Game = new (function() {
     clearTimeout(timerTOH)
     // first of all, save the score, so if you quit while the animation runs, the score is kept
     getScore(function(value){
+      if (!currentPuzzle.isTutorial)
+          level = setLevel(level + 1);
+
       var oldScore = value * 1,
           newScore = setScore(grid.width * grid.height, value);
 
@@ -419,6 +460,7 @@ var Game = new (function() {
           $('#board').addClass('hidden');
           endGameTOH2 = setTimeout(function() {
             gameEnded = true;
+            $('#menugrid h2 > span').text(level);
             $('#menugrid').removeClass('hidden');
             $('#chooseSize').addClass('show');
             $('#score').show();
@@ -820,6 +862,20 @@ var Game = new (function() {
 
     Storage.setItem('score', newScore);
     return newScore;
+  }
+
+  function getLevel(cb) {
+    Storage.getItem('level', function(resultSet) {
+      var value = parseInt(resultSet.level);
+      if (!value)
+        value = 0;
+      cb(value);
+    })
+  }
+
+  function setLevel(newLevel) {
+    Storage.setItem('level', newLevel);
+    return newLevel;
   }
 
   function animateScore(curScore, newScore) {
