@@ -269,7 +269,7 @@ var Game = new (function() {
     onHomeScreen = false;
     inText = false;
     showGame();
-    $('#boardsize').html('<span>Select a size</span>');
+    $('#boardsize').html('<span>Enjoy</span>');
     $('#menugrid h2 > span').text(level);
     $('#menugrid').removeClass('hidden');
     $('#board').addClass('hidden');
