@@ -325,7 +325,8 @@ var Game = new (function() {
 
     if (size===0) {
       if (currentPuzzle) {
-        continueGame();
+        // continueGame();
+        doAction('retry');
         return;
       }
       size = sizeForLevel();
@@ -496,6 +497,8 @@ var Game = new (function() {
       // shift
       if (!currentPuzzle.isTutorial)
         Levels.finishedSize(grid.width);
+
+      currentPuzzle = null;
     })
   }
 
@@ -706,21 +709,21 @@ var Game = new (function() {
         window.Marker && Marker.save('button', 'continue', currentPuzzle? currentPuzzle.size : undefined);
         break;
       case 'retry':
-        // clearTimeout(checkTOH);
-        // $('#game').removeClass('show')
-        // if (Tutorial.active || currentPuzzle.isTutorial) {
-        //   setTimeout(function(){
-        //     Tutorial.start();
-        //   }, 300);
-        //   return;
-        // }
-        // setTimeout(function(){
-        //   startGame(currentPuzzle);
-        // }, 300);
-        //grid.hint.clear();
-        //grid.each(function() { this.system = true;});
+        clearTimeout(checkTOH);
+        $('#game').removeClass('show')
+        if (Tutorial.active || currentPuzzle.isTutorial) {
+          setTimeout(function(){
+            Tutorial.start();
+          }, 300);
+          return;
+        }
+        setTimeout(function(){
+          startGame(currentPuzzle);
+        }, 300);
+        grid.hint.clear();
+        grid.each(function() { this.system = true;});
 
-        //grid.state.restore('empty');
+        grid.state.restore('empty');
         break;
       case 'help':
         if (gameEnded) 
